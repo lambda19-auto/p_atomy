@@ -14,7 +14,7 @@
 
 # 📦 Технологии
 
-* Python 3.11+
+* Python 3.13+
 * aiogram 3
 * OpenAI Responses API
 * FAISS (langchain)
@@ -77,7 +77,7 @@ uv run python core.py
 ## Загрузка образа
 
 ```bash
-docker pull <dockerhub_username>/p_atomy:latest
+docker pull r09ion/p_atomy:latest
 ```
 
 ---
@@ -90,7 +90,7 @@ docker run -d \
   --restart unless-stopped \
   -e OPENAI_API_KEY=your_key \
   -e tg_token=your_token \
-  <dockerhub_username>/p_atomy:latest
+  r09ion/p_atomy:latest
 ```
 
 ### Важно
