@@ -65,7 +65,8 @@ tg_token=your_token
 ## Запуск
 
 ```bash
-uv run python core.py
+cd ai
+uv run python main.py
 ```
 
 ---
