@@ -50,11 +50,11 @@ def reset_limits():
         if now - data["last_active"] > INACTIVITY_TIMEOUT:
             inactive_users.append(user_id)
 
-    # удаляем неактивных
+    # delete inactive
     for user_id in inactive_users:
         del user_sessions[user_id]
 
-    # обновляем лимиты активным
+    # remaining sessions
     for data in user_sessions.values():
         data["remaining_requests"] = LIMIT_REQUESTS
 
