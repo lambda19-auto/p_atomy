@@ -13,7 +13,6 @@ from dotenv import load_dotenv
 
 from core import AI
 
-
 # --------------------
 # SETTINGS
 # --------------------

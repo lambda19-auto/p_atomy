@@ -1,0 +1,18 @@
+# venv
+venv/
+.venv/
+
+# system
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+.vscode/
+
+# jupyter
+.ipynb_checkpoints/
+
+# secrets
+.env
+*.env

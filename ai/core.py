@@ -72,7 +72,6 @@ class AI:
             # запрос к модели
             response = await self.client.responses.create(
                 model="gpt-5-mini-2025-08-07",
-                temperature=0,
                 input=user_input
             )
 

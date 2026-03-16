@@ -71,7 +71,7 @@ uv run python main.py
 ## Загрузка образа
 
 ```bash
-docker pull r09ion/p_atomy:latest
+docker pull lambda19main/p_atomy:latest
 ```
 
 ---
@@ -84,7 +84,7 @@ docker run -d \
   --restart unless-stopped \
   -e OPENAI_API_KEY=your_key \
   -e tg_token=your_token \
-  r09ion/p_atomy:latest
+  lambda19main/p_atomy:latest
 ```
 
 ### Важно
@@ -102,15 +102,6 @@ docker run -d \
 * окно 10 минут
 * при превышении лимита бот уведомляет пользователя
 * лимиты автоматически сбрасываются
-
----
-
-# Возможные улучшения
-
-* Redis для хранения лимитов
-* мониторинг и логирование
-* docker-compose
-* CI/CD
 
 ---
 
