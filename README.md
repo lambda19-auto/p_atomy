@@ -25,6 +25,19 @@
 
 # Локальный запуск (uv)
 
+## Клонируем репозиторий
+
+```bash
+git clone https://github.com/lambda19-auto/p_atomy.git
+```
+
+## Создание и активация виртуального окружения
+
+```bash
+uv venv
+source .venv/bin/activate.fish
+```
+
 ## Установка зависимостей
 
 ```bash
