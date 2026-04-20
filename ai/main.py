@@ -1,5 +1,6 @@
 # import module
 import asyncio
+import logging
 import os
 from datetime import datetime, timedelta
 
@@ -12,6 +13,7 @@ from aiogram.client.default import DefaultBotProperties
 from dotenv import load_dotenv
 
 from core import AI
+from logging_config import setup_logging
 from memory import MemoryStore
 
 # --------------------
@@ -22,11 +24,15 @@ load_dotenv()
 
 TOKEN = os.getenv("tg_token")
 MEMORY_FILE_PATH = os.getenv("MEMORY_FILE_PATH", "memory.json")
+LOG_DIR = os.getenv("LOG_DIR", "logs")
 
 LIMIT_REQUESTS = 10
 INACTIVITY_TIMEOUT = timedelta(minutes=10)
 
 user_sessions = {}
+
+setup_logging(LOG_DIR)
+logger = logging.getLogger(__name__)
 
 ai = AI()
 memory = MemoryStore(file_path=MEMORY_FILE_PATH)
@@ -65,7 +71,7 @@ async def scheduler():
     while True:
         await asyncio.sleep(600)
         reset_limits()
-        print("Лимиты обновлены.")
+        logger.info("Лимиты обновлены.")
 
 
 # --------------------
@@ -107,10 +113,10 @@ async def text_handler(message: Message):
         try:
             memory.add_pair(user_id, message.text, answer) #type:ignore
         except OSError as memory_error:
-            print(f"Ошибка сохранения памяти: {memory_error}")
+            logger.exception("Ошибка сохранения памяти: %s", memory_error)
 
     except Exception as e:
-        print(f"Ошибка: {e}")
+        logger.exception("Ошибка обработки сообщения: %s", e)
         await message.answer("Произошла ошибка при обработке запроса.")
 
 
@@ -130,7 +136,7 @@ async def main():
 
     asyncio.create_task(scheduler())
 
-    print("Бот запущен...")
+    logger.info("Бот запущен...")
     await dp.start_polling(bot)
 
 

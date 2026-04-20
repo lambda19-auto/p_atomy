@@ -1,4 +1,6 @@
 # import modules
+import logging
+
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from langchain_community.vectorstores import FAISS
@@ -12,6 +14,7 @@ class AI:
 
     # Инициализация
     def __init__(self):
+        self.logger = logging.getLogger(__name__)
         self.client = AsyncOpenAI()
         self.load_base()
 
@@ -87,5 +90,5 @@ class AI:
             return response.output_text
 
         except Exception as e:
-            print(f"AI error: {e}")
+            self.logger.exception("AI error: %s", e)
             return "Не удалось получить ответ. Попробуйте позже."

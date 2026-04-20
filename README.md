@@ -10,6 +10,7 @@
 * автоматически сбрасывает лимиты
 * хранит историю диалога в `ai/memory.json` (независимо от рабочей директории запуска)
 * хранит 20 последних сообщений истории на пользователя
+* пишет логи в отдельную папку `logs/` (или в путь из `LOG_DIR`) с разделением на общий и error-лог
 * готов к быстрому развёртыванию через Docker
 
 ---
@@ -67,10 +68,13 @@ cp .env.example .env
 OPENAI_API_KEY=your_key
 tg_token=your_token
 MEMORY_FILE_PATH=memory.json
+LOG_DIR=logs
 ```
 
 Где:
 * `MEMORY_FILE_PATH` — файл для истории диалога (относительный путь считается от папки `ai`)
+* `LOG_DIR` — папка для логов (относительный путь считается от корня проекта)
+* при запуске создаются два файла: `*-all-*.log` (все события) и `*-error-*.log` (только ошибки)
 * бот хранит 20 последних сообщений на пользователя (фиксированное значение по умолчанию)
 
 ---
@@ -99,12 +103,15 @@ docker pull lambda19main/p_atomy:latest
 ### Запуск контейнера
 
 ```bash
+mkdir -p docker-logs
 docker run -d \
   --name atomy-bot \
   --restart unless-stopped \
+  -v $(pwd)/docker-logs:/logs \
   -e OPENAI_API_KEY=your_key \
   -e tg_token=your_token \
   -e MEMORY_FILE_PATH=memory.json \
+  -e LOG_DIR=/logs \
   lambda19main/p_atomy:latest
 ```
 
@@ -113,6 +120,7 @@ docker run -d \
 * `--restart unless-stopped` обеспечивает автоматический перезапуск при падении
 * переменные окружения передаются напрямую через `-e`
 * `.env` файл в контейнере не используется
+* при `-v $(pwd)/docker-logs:/logs` логи сохраняются на хост-машине в папке `docker-logs` даже если контейнер упадёт/будет пересоздан
 * образ готов к запуску без дополнительной сборки
 
 ---
