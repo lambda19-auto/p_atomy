@@ -3,11 +3,8 @@ from datetime import datetime
 from pathlib import Path
 
 
-def setup_logging(log_dir: str, app_name: str = "atomy-bot") -> None:
-    target_dir = Path(log_dir)
-    if not target_dir.is_absolute():
-        target_dir = Path(__file__).resolve().parent.parent / target_dir
-
+def setup_logging(log_dir: str = "logs", app_name: str = "atomy-bot") -> None:
+    target_dir = Path.cwd() / log_dir
     target_dir.mkdir(parents=True, exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

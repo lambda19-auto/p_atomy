@@ -9,14 +9,8 @@ class MemoryEntry(TypedDict):
 
 
 class MemoryStore:
-    def __init__(self, file_path: str = "memory.json"):
-        base_dir = Path(__file__).resolve().parent
-        requested_path = Path(file_path)
-        self.path = (
-            requested_path
-            if requested_path.is_absolute()
-            else base_dir / requested_path
-        )
+    def __init__(self, file_name: str = "memory.json"):
+        self.path = Path.cwd() / file_name
         self.max_entries = 20
         self._data: dict[str, list[MemoryEntry]] = {}
         self._load()

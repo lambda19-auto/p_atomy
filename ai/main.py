@@ -23,19 +23,16 @@ from memory import MemoryStore
 load_dotenv()
 
 TOKEN = os.getenv("tg_token")
-MEMORY_FILE_PATH = os.getenv("MEMORY_FILE_PATH", "memory.json")
-LOG_DIR = os.getenv("LOG_DIR", "logs")
-
 LIMIT_REQUESTS = 10
 INACTIVITY_TIMEOUT = timedelta(minutes=10)
 
 user_sessions = {}
 
-setup_logging(LOG_DIR)
+setup_logging()
 logger = logging.getLogger(__name__)
 
 ai = AI()
-memory = MemoryStore(file_path=MEMORY_FILE_PATH)
+memory = MemoryStore()
 
 
 # --------------------

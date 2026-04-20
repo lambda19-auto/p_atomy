@@ -1,9 +1,8 @@
 FROM python:3.13
 
 WORKDIR /p_atomy
-ENV LOG_DIR=/logs
-RUN mkdir -p /logs
-VOLUME ["/logs"]
+RUN mkdir -p /data
+VOLUME ["/data"]
 
 RUN pip install uv
 
@@ -12,4 +11,5 @@ COPY . .
 RUN mv ai/db ./db
 RUN uv sync
 
-CMD [".venv/bin/python", "ai/main.py"]
+WORKDIR /data
+CMD ["/p_atomy/.venv/bin/python", "/p_atomy/ai/main.py"]
