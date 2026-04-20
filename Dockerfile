@@ -8,7 +8,6 @@ RUN pip install uv
 
 COPY . .
 
-RUN mv ai/db ./db
 RUN uv sync
 
 WORKDIR /data

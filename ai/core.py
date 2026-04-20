@@ -22,7 +22,7 @@ class AI:
     # Загрузка базы знаний
     def load_base(self):
         project_root = Path(__file__).resolve().parent.parent
-        folder_path = str(project_root / "db")
+        folder_path = str(project_root / "ai" / "db")
         index_name = "db_from_atomy"
 
         embeddings = OpenAIEmbeddings()
