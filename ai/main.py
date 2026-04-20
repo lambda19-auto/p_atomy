@@ -12,6 +12,7 @@ from aiogram.client.default import DefaultBotProperties
 from dotenv import load_dotenv
 
 from core import AI
+from memory import MemoryStore
 
 # --------------------
 # SETTINGS
@@ -27,6 +28,7 @@ INACTIVITY_TIMEOUT = timedelta(minutes=10)
 user_sessions = {}
 
 ai = AI()
+memory = MemoryStore()
 
 
 # --------------------
@@ -96,9 +98,11 @@ async def text_handler(message: Message):
     await message.bot.send_chat_action(message.chat.id, "typing") #type:ignore
 
     try:
-        answer = await ai.consult(message.text) #type:ignore
+        history = memory.get_history(user_id)
+        answer = await ai.consult(message.text, history=history) #type:ignore
 
         session["remaining_requests"] -= 1
+        memory.add_pair(user_id, message.text, answer) #type:ignore
 
         await message.answer(answer)
 

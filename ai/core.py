@@ -51,16 +51,25 @@ class AI:
         """
 
     # Основная функция консультации
-    async def consult(self, query: str) -> str:
+    async def consult(self, query: str, history: list[dict[str, str]] | None = None) -> str:
 
         try:
             # поиск релевантных документов
             docs = self.db.similarity_search(query, k=4)
             context = "\n".join(doc.page_content for doc in docs)
 
+            history_text = ""
+            if history:
+                history_text = "\n".join(
+                    f"{entry['role']}: {entry['text']}" for entry in history
+                )
+
             # формируем prompt
             user_input = f"""
             {self.system}
+
+            Память диалога:
+            {history_text}
 
             Информация для ответа:
             {context}
