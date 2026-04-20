@@ -1,5 +1,6 @@
 # import modules
 import logging
+from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
@@ -20,8 +21,8 @@ class AI:
 
     # Загрузка базы знаний
     def load_base(self):
-
-        folder_path = "db"
+        project_root = Path(__file__).resolve().parent.parent
+        folder_path = str(project_root / "db")
         index_name = "db_from_atomy"
 
         embeddings = OpenAIEmbeddings()
