@@ -104,7 +104,10 @@ async def text_handler(message: Message):
 
         session["remaining_requests"] -= 1
         await message.answer(answer)
-        memory.add_pair(user_id, message.text, answer) #type:ignore
+        try:
+            memory.add_pair(user_id, message.text, answer) #type:ignore
+        except OSError as memory_error:
+            print(f"Ошибка сохранения памяти: {memory_error}")
 
     except Exception as e:
         print(f"Ошибка: {e}")
