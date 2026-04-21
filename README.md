@@ -1,69 +1,69 @@
 # AI Telegram Consultant (Atomy)
 
-Асинхронный Telegram-бот на **aiogram 3**, использующий модель `gpt-4.1-mini` (через прямой вызов OpenRouter API) и локальную векторную базу знаний (FAISS).
+An asynchronous Telegram bot built with **aiogram 3**, using the `gpt-4.1-mini` model (via direct OpenRouter API calls) and a local vector knowledge base (FAISS).
 
-Бот:
+The bot:
 
-* отвечает на основе векторной базы знаний
-* использует прямой HTTP-вызов OpenRouter Chat Completions API
-* ограничивает пользователей лимитом 10 сообщений за 10 минут
-* автоматически сбрасывает лимиты
-* хранит историю диалога в `memory.json` в текущей рабочей директории запуска
-* хранит 20 последних сообщений истории на пользователя
-* пишет логи в папку `logs/` в текущей рабочей директории с разделением на общий и error-лог
-* готов к быстрому развёртыванию через Docker
-* работает в webhook-режиме (без long polling)
+* answers based on a vector knowledge base
+* uses direct HTTP requests to the OpenRouter Chat Completions API
+* enforces a rate limit of 10 messages per 10 minutes per user
+* automatically resets limits
+* stores chat history in `memory.json` in the current working directory
+* keeps the last 20 history messages per user
+* writes logs to the `logs/` folder in the current working directory, split into general and error logs
+* is ready for fast deployment via Docker
+* runs in webhook mode (without long polling)
 
 ---
 
-## Технологии
+## Technologies
 
 * Python 3.13+
 * aiogram 3
-* OpenRouter Chat Completions API (без SDK)
+* OpenRouter Chat Completions API (without SDK)
 * FAISS (langchain)
 * uv
 * Docker
 
 ---
 
-## Локальный запуск через Cloudflare Tunnel (uv)
+## Local Run via Cloudflare Tunnel (uv)
 
-### Клонируем репозиторий
+### Clone the repository
 
 ```bash
 git clone https://github.com/lambda19-auto/p_atomy.git
 ```
 
-### Создание и активация виртуального окружения
+### Create and activate a virtual environment
 
 ```bash
 uv venv
 source .venv/bin/activate
 ```
 
-### Установка зависимостей
+### Install dependencies
 
 ```bash
 uv sync
 ```
 ---
 
-### Настройка переменных
+### Configure variables
 
-В проекте уже есть файл:
+The project already includes:
 
 ```
 .env.example
 ```
 
-Создать рабочий `.env`:
+Create a working `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-и заполнить:
+and fill it with:
 
 ```
 OPENROUTER_API_KEY=your_key
@@ -76,77 +76,77 @@ APP_PORT=8080
 OPENROUTER_MODEL=openai/gpt-4.1-mini
 ```
 
-Где:
-* `OPENROUTER_API_KEY` используется и для генерации ответа, и для построения embedding запроса пользователя
-* файл памяти всегда называется `memory.json` и создаётся в текущей рабочей директории
-* логи всегда пишутся в директорию `logs/` в текущей рабочей директории
-* при запуске создаются два файла: `*-all-*.log` (все события) и `*-error-*.log` (только ошибки)
-* бот хранит 20 последних сообщений на пользователя (фиксированное значение по умолчанию)
+Where:
+* `OPENROUTER_API_KEY` is used both for response generation and for building embeddings for user queries
+* the memory file is always named `memory.json` and is created in the current working directory
+* logs are always written to the `logs/` directory in the current working directory
+* on startup, two files are created: `*-all-*.log` (all events) and `*-error-*.log` (errors only)
+* the bot stores the last 20 messages per user (fixed default value)
 
 ---
 
-### Запуск бота
+### Start the bot
 
 ```bash
 cd ai
 uv run python main.py
 ```
 
-Где:
-* `WEBHOOK_HOST` — публичный HTTPS-домен (или туннель), доступный Telegram.
-* `WEBHOOK_PATH` — путь webhook-эндпоинта (по умолчанию `/telegram/webhook`).
-* `WEBHOOK_SECRET` — секрет для заголовка `X-Telegram-Bot-Api-Secret-Token`.
-* `APP_HOST` и `APP_PORT` — адрес и порт локального HTTP-сервера (по умолчанию `0.0.0.0:8080`).
+Where:
+* `WEBHOOK_HOST` is a public HTTPS domain (or tunnel) reachable by Telegram.
+* `WEBHOOK_PATH` is the webhook endpoint path (default: `/telegram/webhook`).
+* `WEBHOOK_SECRET` is the secret for the `X-Telegram-Bot-Api-Secret-Token` header.
+* `APP_HOST` and `APP_PORT` are the local HTTP server address and port (default: `0.0.0.0:8080`).
 
-### Запуск Cloudflare Tunnel
+### Start Cloudflare Tunnel
 
-В отдельном терминале запустите туннель:
-
-```bash
-cloudflared tunnel --url http://localhost:8080
-```
-
-Затем:
-
-1. Возьмите выданный URL вида `https://abc123.trycloudflare.com`.
-2. Укажите его в `.env` как `WEBHOOK_HOST`.
-3. Перезапустите бота (`Ctrl+C` и снова `uv run python main.py`), чтобы webhook установился на новый адрес.
-4. Проверьте доступность:
-
-```bash
-curl https://<ваш-tunnel-домен>/health
-```
-
-Ожидаемый ответ: `ok`.
-
-### Если через Tunnel бот не отвечает
-
-Если бот не отвечает через Cloudflare Tunnel, проверьте:
-
-1. Tunnel запущен и проксирует именно на локальный порт приложения, например:
+Run the tunnel in a separate terminal:
 
 ```bash
 cloudflared tunnel --url http://localhost:8080
 ```
 
-2. В `.env` укажите новый HTTPS-адрес туннеля целиком в `WEBHOOK_HOST` (например, `https://abc123.trycloudflare.com`).
-3. После смены адреса туннеля обязательно перезапустите бота, чтобы он заново вызвал `set_webhook`.
-4. Проверьте `WEBHOOK_SECRET`: значение в `.env` должно совпадать с тем, что бот отправляет в Telegram при установке webhook.
-5. Убедитесь, что endpoint здоровья доступен извне:
+Then:
+
+1. Take the generated URL like `https://abc123.trycloudflare.com`.
+2. Set it in `.env` as `WEBHOOK_HOST`.
+3. Restart the bot (`Ctrl+C` and run `uv run python main.py` again) so the webhook is set to the new address.
+4. Check availability:
 
 ```bash
-curl https://<ваш-tunnel-домен>/health
+curl https://<your-tunnel-domain>/health
 ```
 
-Ожидаемый ответ: `ok`.
+Expected response: `ok`.
+
+### If the bot does not respond via Tunnel
+
+If the bot does not respond through Cloudflare Tunnel, check:
+
+1. The tunnel is running and proxies to the correct local app port, for example:
+
+```bash
+cloudflared tunnel --url http://localhost:8080
+```
+
+2. In `.env`, set the full new HTTPS tunnel address in `WEBHOOK_HOST` (for example, `https://abc123.trycloudflare.com`).
+3. After changing the tunnel address, restart the bot so it calls `set_webhook` again.
+4. Check `WEBHOOK_SECRET`: the value in `.env` must match what the bot sends to Telegram when setting the webhook.
+5. Make sure the health endpoint is reachable from outside:
+
+```bash
+curl https://<your-tunnel-domain>/health
+```
+
+Expected response: `ok`.
 
 ---
 
-## Развёртывание через Docker (рекомендуемый способ)
+## Deployment via Docker (recommended)
 
-Готовый образ опубликован в Docker Hub.
+A ready-to-use image is published on Docker Hub.
 
-### Загрузка образа
+### Pull the image
 
 ```bash
 docker pull lambda19main/p_atomy:latest
@@ -154,7 +154,7 @@ docker pull lambda19main/p_atomy:latest
 
 ---
 
-### Запуск контейнера
+### Run the container
 
 ```bash
 mkdir -p docker-data
@@ -174,24 +174,24 @@ docker run -d \
   lambda19main/p_atomy:latest
 ```
 
-#### Важно
+#### Important
 
-* `--restart unless-stopped` обеспечивает автоматический перезапуск при падении
-* переменные окружения передаются напрямую через `-e`
-* `.env` файл в контейнере не используется
-* при `-v $(pwd)/docker-data:/data` память сохраняется на хосте как `docker-data/memory.json`
-* при `-v $(pwd)/docker-data:/data` логи сохраняются на хосте в `docker-data/logs/` даже если контейнер упадёт/будет пересоздан
-* образ готов к запуску без дополнительной сборки
-
----
-
-## Ограничение запросов
-
-* 10 сообщений на пользователя
-* окно 10 минут
-* при превышении лимита бот уведомляет пользователя
-* лимиты автоматически сбрасываются
+* `--restart unless-stopped` ensures automatic restart on failure
+* environment variables are passed directly via `-e`
+* the `.env` file is not used inside the container
+* with `-v $(pwd)/docker-data:/data`, memory is persisted on the host as `docker-data/memory.json`
+* with `-v $(pwd)/docker-data:/data`, logs are persisted on the host in `docker-data/logs/` even if the container crashes/is recreated
+* the image is ready to run without additional build steps
 
 ---
 
-AI-консультант компании Atomy от lambda19.
+## Request Limiting
+
+* 10 messages per user
+* 10-minute window
+* when the limit is exceeded, the bot notifies the user
+* limits reset automatically
+
+---
+
+Atomy AI consultant by lambda19.
