@@ -31,6 +31,7 @@ WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "/telegram/webhook")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET")
 APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
 APP_PORT = int(os.getenv("APP_PORT", "8080"))
+WEBHOOK_DRAIN_TIMEOUT_SECONDS = float(os.getenv("WEBHOOK_DRAIN_TIMEOUT_SECONDS", "15"))
 LIMIT_REQUESTS = 10
 INACTIVITY_TIMEOUT = timedelta(minutes=10)
 
@@ -205,7 +206,25 @@ async def main():
                 "Ожидание завершения %s webhook-задач перед остановкой.",
                 len(in_flight_updates),
             )
-            await asyncio.gather(*in_flight_updates, return_exceptions=True)
+            done, pending = await asyncio.wait(
+                in_flight_updates,
+                timeout=WEBHOOK_DRAIN_TIMEOUT_SECONDS,
+            )
+            if pending:
+                logger.warning(
+                    (
+                        "Не удалось дождаться %s webhook-задач за %.1f секунд. "
+                        "Задачи будут отменены."
+                    ),
+                    len(pending),
+                    WEBHOOK_DRAIN_TIMEOUT_SECONDS,
+                )
+                for task in pending:
+                    task.cancel()
+                await asyncio.gather(*pending, return_exceptions=True)
+
+            if done:
+                await asyncio.gather(*done, return_exceptions=True)
 
         if scheduler_task:
             scheduler_task.cancel()
