@@ -14,7 +14,7 @@ from aiogram.filters import CommandStart
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 from core import AI
 from logging_config import setup_logging
@@ -25,7 +25,7 @@ from memory import MemoryStore
 # --------------------
 # load enviroments
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-load_dotenv(PROJECT_ROOT / ".env")
+load_dotenv(find_dotenv())
 
 TOKEN = os.getenv("tg_token")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
