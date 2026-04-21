@@ -139,7 +139,12 @@ async def text_handler(message: Message):
         await message.answer("Сервис временно недоступен. Попробуйте позже.")
         return
 
-    await message.bot.send_chat_action(message.chat.id, "typing") #type:ignore
+    async def typing_indicator() -> None:
+        while True:
+            await message.bot.send_chat_action(message.chat.id, "typing") #type:ignore
+            await asyncio.sleep(4)
+
+    typing_task = asyncio.create_task(typing_indicator())
 
     try:
         history = memory.get_history(user_id)
@@ -155,6 +160,17 @@ async def text_handler(message: Message):
     except Exception as e:
         logger.exception("Ошибка обработки сообщения: %s", e)
         await message.answer("Произошла ошибка при обработке запроса.")
+    finally:
+        typing_task.cancel()
+        try:
+            await typing_task
+        except asyncio.CancelledError:
+            pass
+        except Exception as typing_error:
+            logger.warning(
+                "Ошибка typing-индикатора во время cleanup проигнорирована: %s",
+                typing_error,
+            )
 
 
 # --------------------
