@@ -27,7 +27,7 @@
 
 ---
 
-## Локальный запуск (uv)
+## Локальный запуск через Cloudflare Tunnel (uv)
 
 ### Клонируем репозиторий
 
@@ -39,7 +39,7 @@ git clone https://github.com/lambda19-auto/p_atomy.git
 
 ```bash
 uv venv
-source .venv/bin/activate.fish
+source .venv/bin/activate
 ```
 
 ### Установка зависимостей
@@ -83,7 +83,7 @@ APP_PORT=8080
 
 ---
 
-### Запуск
+### Запуск бота
 
 ```bash
 cd ai
@@ -96,7 +96,28 @@ uv run python main.py
 * `WEBHOOK_SECRET` — секрет для заголовка `X-Telegram-Bot-Api-Secret-Token`.
 * `APP_HOST` и `APP_PORT` — адрес и порт локального HTTP-сервера (по умолчанию `0.0.0.0:8080`).
 
-### Проверка Cloudflare Tunnel (локально)
+### Запуск Cloudflare Tunnel
+
+В отдельном терминале запустите туннель:
+
+```bash
+cloudflared tunnel --url http://localhost:8080
+```
+
+Затем:
+
+1. Возьмите выданный URL вида `https://abc123.trycloudflare.com`.
+2. Укажите его в `.env` как `WEBHOOK_HOST`.
+3. Перезапустите бота (`Ctrl+C` и снова `uv run python main.py`), чтобы webhook установился на новый адрес.
+4. Проверьте доступность:
+
+```bash
+curl https://<ваш-tunnel-домен>/health
+```
+
+Ожидаемый ответ: `ok`.
+
+### Если через Tunnel бот не отвечает
 
 Если бот не отвечает через Cloudflare Tunnel, проверьте:
 
