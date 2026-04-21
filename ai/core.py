@@ -1,9 +1,9 @@
-# import modules
 import logging
+import os
 from pathlib import Path
 
+import aiohttp
 from dotenv import load_dotenv, find_dotenv
-from openai import AsyncOpenAI
 from langchain_community.vectorstores import FAISS
 from langchain_openai import OpenAIEmbeddings
 
@@ -17,7 +17,11 @@ class AI:
     # Инициализация
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.client = AsyncOpenAI()
+        self.api_key = os.getenv("OPENROUTER_API_KEY")
+        self.model = os.getenv("OPENROUTER_MODEL", "openai/gpt-4.1-mini")
+        self.embedding_model = os.getenv("OPENROUTER_EMBEDDING_MODEL", "text-embedding-3-large")
+        self.referer = os.getenv("OPENROUTER_REFERER", "https://github.com/lambda19-auto/p_atomy")
+        self.title = os.getenv("OPENROUTER_TITLE", "Atomy AI Consultant")
         self.load_base()
 
     # Загрузка базы знаний
@@ -26,7 +30,11 @@ class AI:
         folder_path = str(project_root / "ai" / "db")
         index_name = "db_from_atomy"
 
-        embeddings = OpenAIEmbeddings()
+        embeddings = OpenAIEmbeddings(
+            model=self.embedding_model,
+            api_key=self.api_key,
+            base_url="https://openrouter.ai/api/v1",
+        )
 
         self.db = FAISS.load_local(
             folder_path=folder_path,
@@ -83,13 +91,31 @@ class AI:
             {query}
             """
 
-            # запрос к модели
-            response = await self.client.responses.create(
-                model="gpt-5-mini-2025-08-07",
-                input=user_input
-            )
+            if not self.api_key:
+                raise RuntimeError("Не задан OPENROUTER_API_KEY")
 
-            return response.output_text
+            payload = {
+                "model": self.model,
+                "messages": [{"role": "user", "content": user_input}],
+            }
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": self.referer,
+                "X-Title": self.title,
+            }
+
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers=headers,
+                    json=payload,
+                    timeout=aiohttp.ClientTimeout(total=60),
+                ) as response:
+                    response.raise_for_status()
+                    data = await response.json()
+
+            return data["choices"][0]["message"]["content"].strip()
 
         except Exception as e:
             self.logger.exception("AI error: %s", e)
