@@ -96,6 +96,27 @@ uv run python main.py
 * `WEBHOOK_SECRET` — секрет для заголовка `X-Telegram-Bot-Api-Secret-Token`.
 * `APP_HOST` и `APP_PORT` — адрес и порт локального HTTP-сервера (по умолчанию `0.0.0.0:8080`).
 
+### Проверка Cloudflare Tunnel (локально)
+
+Если бот не отвечает через Cloudflare Tunnel, проверьте:
+
+1. Tunnel запущен и проксирует именно на локальный порт приложения, например:
+
+```bash
+cloudflared tunnel --url http://localhost:8080
+```
+
+2. В `.env` укажите новый HTTPS-адрес туннеля целиком в `WEBHOOK_HOST` (например, `https://abc123.trycloudflare.com`).
+3. После смены адреса туннеля обязательно перезапустите бота, чтобы он заново вызвал `set_webhook`.
+4. Проверьте `WEBHOOK_SECRET`: значение в `.env` должно совпадать с тем, что бот отправляет в Telegram при установке webhook.
+5. Убедитесь, что endpoint здоровья доступен извне:
+
+```bash
+curl https://<ваш-tunnel-домен>/health
+```
+
+Ожидаемый ответ: `ok`.
+
 ---
 
 ## Развёртывание через Docker (рекомендуемый способ)

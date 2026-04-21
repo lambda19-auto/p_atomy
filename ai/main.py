@@ -4,6 +4,7 @@ import contextlib
 import logging
 import os
 from datetime import datetime, timedelta
+from pathlib import Path
 
 from aiohttp import web
 from aiogram import Bot, Dispatcher, F
@@ -23,7 +24,8 @@ from memory import MemoryStore
 # SETTINGS
 # --------------------
 # load enviroments
-load_dotenv()
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+load_dotenv(PROJECT_ROOT / ".env")
 
 TOKEN = os.getenv("tg_token")
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
@@ -87,6 +89,20 @@ def get_webhook_url() -> str:
     return f"{WEBHOOK_HOST.rstrip('/')}{WEBHOOK_PATH}"
 
 
+def validate_env() -> None:
+    missing = []
+    if not TOKEN:
+        missing.append("tg_token")
+    if not WEBHOOK_HOST:
+        missing.append("WEBHOOK_HOST")
+
+    if missing:
+        raise RuntimeError(
+            "Не заданы обязательные переменные окружения: "
+            f"{', '.join(missing)}."
+        )
+
+
 # --------------------
 # HENDLERS
 # --------------------
@@ -139,6 +155,7 @@ async def text_handler(message: Message):
 
 async def main():
     global scheduler_task
+    validate_env()
 
     bot = Bot(
         token=TOKEN, #type:ignore
@@ -157,7 +174,17 @@ async def main():
         secret_token=WEBHOOK_SECRET,
         drop_pending_updates=True,
     )
-    logger.info("Webhook установлен: %s", webhook_url)
+    webhook_info = await bot.get_webhook_info()
+    logger.info(
+        (
+            "Webhook установлен: %s | pending_updates=%s | "
+            "last_error_date=%s | last_error_message=%s"
+        ),
+        webhook_info.url,
+        webhook_info.pending_update_count,
+        webhook_info.last_error_date,
+        webhook_info.last_error_message,
+    )
 
     in_flight_updates: set[asyncio.Task[None]] = set()
 
