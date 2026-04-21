@@ -162,8 +162,15 @@ async def text_handler(message: Message):
         await message.answer("Произошла ошибка при обработке запроса.")
     finally:
         typing_task.cancel()
-        with contextlib.suppress(asyncio.CancelledError):
+        try:
             await typing_task
+        except asyncio.CancelledError:
+            pass
+        except Exception as typing_error:
+            logger.warning(
+                "Ошибка typing-индикатора во время cleanup проигнорирована: %s",
+                typing_error,
+            )
 
 
 # --------------------
