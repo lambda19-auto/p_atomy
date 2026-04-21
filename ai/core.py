@@ -19,7 +19,7 @@ class AI:
         self.logger = logging.getLogger(__name__)
         self.api_key = os.getenv("OPENROUTER_API_KEY")
         self.model = os.getenv("OPENROUTER_MODEL", "openai/gpt-4.1-mini")
-        self.embedding_model = os.getenv("OPENROUTER_EMBEDDING_MODEL", "text-embedding-3-large")
+        self.embedding_model = "text-embedding-3-small"
         self.referer = os.getenv("OPENROUTER_REFERER", "https://github.com/lambda19-auto/p_atomy")
         self.title = os.getenv("OPENROUTER_TITLE", "Atomy AI Consultant")
         self.load_base()
