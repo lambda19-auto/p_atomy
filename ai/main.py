@@ -136,7 +136,9 @@ async def text_handler(message: Message):
 
     if ai is None:
         logger.error("AI клиент не инициализирован.")
-        await message.answer("Сервис временно недоступен. Попробуйте позже.")
+        await message.answer(
+            "Сейчас я не могу ответить. Пожалуйста, попробуйте чуть позже."
+        )
         return
 
     async def typing_indicator() -> None:
@@ -159,7 +161,9 @@ async def text_handler(message: Message):
 
     except Exception as e:
         logger.exception("Ошибка обработки сообщения: %s", e)
-        await message.answer("Произошла ошибка при обработке запроса.")
+        await message.answer(
+            "Что-то пошло не так, но я уже стараюсь помочь. Пожалуйста, повторите вопрос чуть позже."
+        )
     finally:
         typing_task.cancel()
         try:
