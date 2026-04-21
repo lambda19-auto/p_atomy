@@ -119,4 +119,4 @@ class AI:
 
         except Exception as e:
             self.logger.exception("AI error: %s", e)
-            return "Не удалось получить ответ. Попробуйте позже."
+            return "Кажется, сейчас не получается ответить. Пожалуйста, попробуйте чуть позже."
