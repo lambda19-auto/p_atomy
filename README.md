@@ -1,11 +1,11 @@
 # AI Telegram Consultant (Atomy)
 
-Асинхронный Telegram-бот на **aiogram 3**, использующий модель `gpt-5-mini` и локальную векторную базу знаний (FAISS).
+Асинхронный Telegram-бот на **aiogram 3**, использующий модель `gpt-4.1-mini` (через прямой вызов OpenRouter API) и локальную векторную базу знаний (FAISS).
 
 Бот:
 
 * отвечает на основе векторной базы знаний
-* использует OpenAI Responses API
+* использует прямой HTTP-вызов OpenRouter Chat Completions API
 * ограничивает пользователей лимитом 10 сообщений за 10 минут
 * автоматически сбрасывает лимиты
 * хранит историю диалога в `memory.json` в текущей рабочей директории запуска
@@ -20,7 +20,7 @@
 
 * Python 3.13+
 * aiogram 3
-* OpenAI Responses API
+* OpenRouter Chat Completions API (без SDK)
 * FAISS (langchain)
 * uv
 * Docker
@@ -66,16 +66,18 @@ cp .env.example .env
 и заполнить:
 
 ```
-OPENAI_API_KEY=your_key
+OPENROUTER_API_KEY=your_key
 tg_token=your_token
 WEBHOOK_HOST=https://your-domain.example
 WEBHOOK_PATH=/telegram/webhook
 WEBHOOK_SECRET=strong_random_secret
 APP_HOST=0.0.0.0
 APP_PORT=8080
+OPENROUTER_MODEL=openai/gpt-4.1-mini
 ```
 
 Где:
+* `OPENROUTER_API_KEY` используется и для генерации ответа, и для построения embedding запроса пользователя
 * файл памяти всегда называется `memory.json` и создаётся в текущей рабочей директории
 * логи всегда пишутся в директорию `logs/` в текущей рабочей директории
 * при запуске создаются два файла: `*-all-*.log` (все события) и `*-error-*.log` (только ошибки)
@@ -161,13 +163,14 @@ docker run -d \
   --restart unless-stopped \
   -p 8080:8080 \
   -v $(pwd)/docker-data:/data \
-  -e OPENAI_API_KEY=your_key \
+  -e OPENROUTER_API_KEY=your_key \
   -e tg_token=your_token \
   -e WEBHOOK_HOST=https://your-domain.example \
   -e WEBHOOK_PATH=/telegram/webhook \
   -e WEBHOOK_SECRET=strong_random_secret \
   -e APP_HOST=0.0.0.0 \
   -e APP_PORT=8080 \
+  -e OPENROUTER_MODEL=openai/gpt-4.1-mini \
   lambda19main/p_atomy:latest
 ```
 

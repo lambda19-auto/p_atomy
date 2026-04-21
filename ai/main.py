@@ -28,7 +28,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(find_dotenv())
 
 TOKEN = os.getenv("tg_token")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 WEBHOOK_HOST = os.getenv("WEBHOOK_HOST")
 WEBHOOK_PATH = os.getenv("WEBHOOK_PATH", "/telegram/webhook")
 WEBHOOK_SECRET = os.getenv("WEBHOOK_SECRET")
@@ -92,8 +92,8 @@ def get_webhook_url() -> str:
 
 def validate_env() -> None:
     missing = []
-    if not OPENAI_API_KEY:
-        missing.append("OPENAI_API_KEY")
+    if not OPENROUTER_API_KEY:
+        missing.append("OPENROUTER_API_KEY")
     if not TOKEN:
         missing.append("tg_token")
     if not WEBHOOK_HOST:
