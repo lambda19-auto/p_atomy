@@ -158,6 +158,14 @@ async def main():
     )
     logger.info("Webhook установлен: %s", webhook_url)
 
+    in_flight_updates: set[asyncio.Task[None]] = set()
+
+    async def process_update(update: Update) -> None:
+        try:
+            await dp.feed_update(bot, update)
+        except Exception:
+            logger.exception("Ошибка при асинхронной обработке webhook update.")
+
     async def webhook_handler(request: web.Request) -> web.Response:
         if WEBHOOK_SECRET:
             secret_header = request.headers.get("X-Telegram-Bot-Api-Secret-Token")
@@ -167,7 +175,9 @@ async def main():
 
         update_data = await request.json()
         update = Update.model_validate(update_data, context={"bot": bot})
-        await dp.feed_update(bot, update)
+        task = asyncio.create_task(process_update(update))
+        in_flight_updates.add(task)
+        task.add_done_callback(in_flight_updates.discard)
         return web.Response(status=200, text="ok")
 
     async def health_handler(_: web.Request) -> web.Response:
