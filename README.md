@@ -194,4 +194,3 @@ docker run -d \
 
 ---
 
-Atomy AI consultant by lambda19.
