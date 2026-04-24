@@ -149,7 +149,7 @@ A ready-to-use image is published on Docker Hub.
 ### Pull the image
 
 ```bash
-docker pull lambda19main/p_atomy:latest
+docker pull lambda19main/p_atomy:1.0.0
 ```
 
 ---
@@ -171,7 +171,7 @@ docker run -d \
   -e APP_HOST=0.0.0.0 \
   -e APP_PORT=8080 \
   -e OPENROUTER_MODEL=openai/gpt-4.1-mini \
-  lambda19main/p_atomy:latest
+  lambda19main/p_atomy:1.0.0
 ```
 
 #### Important
