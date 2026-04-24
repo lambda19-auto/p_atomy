@@ -66,13 +66,17 @@ cp .env.example .env
 and fill it with:
 
 ```
-OPENROUTER_API_KEY=your_key
+# Required
+OPENROUTER_API_KEY=your_api_key
 tg_token=your_token
-WEBHOOK_HOST=https://your-domain.example
+WEBHOOK_HOST=your_domain
+
+# Optional (defaults are shown)
 WEBHOOK_PATH=/telegram/webhook
 WEBHOOK_SECRET=strong_random_secret
 APP_HOST=0.0.0.0
 APP_PORT=8080
+WEBHOOK_DRAIN_TIMEOUT_SECONDS=15
 OPENROUTER_MODEL=openai/gpt-4.1-mini
 ```
 
